@@ -1,29 +1,47 @@
-import javax.xml.crypto.Data;
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 
-public class Client {
+public class Client implements Runnable {
 
-    public static void main (String[] args){
-        try {
-            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
-            DatagramSocket clientSocket = new DatagramSocket();
-            InetAddress ipAddress = InetAddress.getByName("localhost"); //May change method
-            String str = userInput.readLine();
-            byte[] inData = new byte[1024];
-            byte[] outData = str.getBytes();
-            DatagramPacket outPacket = new DatagramPacket(outData, outData.length, ipAddress, 1234);
-            DatagramPacket inPacket = new DatagramPacket(inData, inData.length);
-            clientSocket.send(outPacket);
-            System.out.println("Waiting");
-            clientSocket.receive(inPacket);
-            System.out.println("Received");
-            String receiveStr = new String(inPacket.getData());
-            System.out.println(receiveStr);
-            clientSocket.close();
-        } catch(IOException ioe) {
-            System.out.println("Error:" + ioe);
+    public void receive( String ip, int port ) throws IOException {
+        byte[] buffer = new byte[ 1024 ];
+        MulticastSocket socket = new MulticastSocket( 4321 );
+        InetAddress group = InetAddress.getByName( "230.0.0.0" );
+        socket.joinGroup( group );
+        while ( true ) {
+            System.out.println( "Waiting for multicast message..." );
+            DatagramPacket packet = new DatagramPacket( buffer, buffer.length );
+            socket.receive(packet);
+            String msg = new String( packet.getData(), packet.getOffset(), packet.getLength() );
+            System.out.println("[Multicast UDP message received] >> " + msg );
+            if ( "OK".equals( msg ) ) {
+                System.out.println( "No more message. Exiting : " + msg );
+                break;
+            }
         }
+        socket.leaveGroup(group);
+        socket.close();
+    }
+
+    @Override
+    public void run() {
+        try {
+            receive( "230.0.0.0", 4321 );
+        } catch ( IOException ex ) {
+            ex.printStackTrace();
+        }
+    }
+    public static void main( String[] args ) {
+
+        Thread t = new Thread( new Client() );
+        Thread t2 = new Thread( new Client() );
+        t.start();
+        t2.start();
+
+
 
     }
+
 }

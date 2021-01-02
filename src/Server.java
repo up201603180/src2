@@ -1,25 +1,23 @@
-import java.net.*;
-import java.io.*;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 public class Server {
-    public static void main(String[] args) throws IOException {
-        DatagramSocket serverSocket = new DatagramSocket(1234); //creation of socket
-        BufferedReader serverInput = new BufferedReader(new InputStreamReader(System.in)); //to send data
-        InetAddress ipAddress = InetAddress.getByName("localhost"); //to send data
-        byte outData[] = new byte[1024];
-        byte inData[] = new byte[1024];
-        while(true){ //to receive data from client
-            DatagramPacket packet2 = new DatagramPacket(inData, inData.length);
-            serverSocket.receive(packet2);
-            String str = new String(packet2.getData());
-            System.out.println(str);
 
-            InetAddress clientAddress = packet2.getAddress();
-            int port = packet2.getPort();
-            String sendStr = serverInput.readLine();
-            outData = sendStr.getBytes();
-            DatagramPacket outPacket = new DatagramPacket(outData, outData.length, clientAddress, port);
-            serverSocket.send(outPacket);
-        }
+    public static void send( String message, String ipAddress, int port ) throws IOException {
+        DatagramSocket socket = new DatagramSocket();
+        InetAddress group = InetAddress.getByName( ipAddress );
+        byte[] msg = message.getBytes();
+        DatagramPacket packet = new DatagramPacket( msg, msg.length, group, port );
+        socket.send( packet );
+        socket.close();
+    }
+
+    public static void main( String[] args ) throws IOException {
+        send( "This is a multicast message", "230.0.0.0", 4321 );
+        send( "This is the second multicast message", "230.0.0.0", 4321 );
+        send( "This is the third multicast message", "230.0.0.0", 4321 );
+        send( "OK", "230.0.0.0", 4321 );
     }
 }
