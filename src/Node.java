@@ -44,20 +44,4 @@ public class Node implements Runnable {
             ex.printStackTrace();
         }
     }
-
-    public static void main ( String[] args ) throws IOException, InterruptedException {
-
-        // Receive
-        Thread t = new Thread( new Node(1 , 10, 10, 5) );
-        t.start();
-
-        // Delay to ensure the first send is received
-        TimeUnit.MILLISECONDS.sleep(10);
-
-        // Transmit
-        Transmitter.send( 0,"Multicast Message Test", MULTICAST_ADDR, MULTICAST_PORT );
-        Transmitter.send( 0, "Exit", MULTICAST_ADDR, MULTICAST_PORT );
-
-    }
-
 }
