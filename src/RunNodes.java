@@ -16,15 +16,14 @@ public class RunNodes {
         Node nodeA = new Node(0, 0,0, 20);
 
         List<Thread> threads = new ArrayList<>();
-        for (int i=1;i<6;i++){
-            Node node = new Node(i, i,i, 40*i);
+        Random rand = new Random();
+        for (int i=6;i>0;i--){
+            Node node = new Node(i, i,i, rand.nextInt(100));
             threads.add(new Thread(node));
         }
         for(int i=0; i<threads.size(); i++){
             threads.get(i).start();
+            TimeUnit.MILLISECONDS.sleep(10);
         }
-        TimeUnit.MILLISECONDS.sleep(1000);
-        Thread thread = new Thread((nodeA));
-        thread.start();
     }
 }
