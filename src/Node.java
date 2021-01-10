@@ -29,8 +29,18 @@ public class Node implements Runnable {
     @Override
     public void run() {
         try {
-            Receiver.receive( MULTICAST_ADDR, MULTICAST_PORT );
-        } catch ( IOException ex ) {
+            if(this.id == 0){
+                Transmitter.send(this.id, "hi", MULTICAST_ADDR, MULTICAST_PORT);
+                TimeUnit.MILLISECONDS.sleep(500);
+                Transmitter.send(this.id, "Exit", MULTICAST_ADDR, MULTICAST_PORT);
+            }
+            else {
+                Receiver.receive(this.id, MULTICAST_ADDR, MULTICAST_PORT);
+            }
+            //TimeUnit.MILLISECONDS.sleep(10);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } catch (Exception ex){
             ex.printStackTrace();
         }
     }
@@ -45,8 +55,8 @@ public class Node implements Runnable {
         TimeUnit.MILLISECONDS.sleep(10);
 
         // Transmit
-        Transmitter.send( "Multicast Message Test", MULTICAST_ADDR, MULTICAST_PORT );
-        Transmitter.send( "Exit", MULTICAST_ADDR, MULTICAST_PORT );
+        Transmitter.send( 0,"Multicast Message Test", MULTICAST_ADDR, MULTICAST_PORT );
+        Transmitter.send( 0, "Exit", MULTICAST_ADDR, MULTICAST_PORT );
 
     }
 
