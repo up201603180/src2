@@ -1,8 +1,9 @@
+package Rafael;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
-public class Node implements Runnable {
+public class Node {
 
     // Variables for the Multicast Communication
     private static final int    MULTICAST_PORT = 1234;
@@ -16,32 +17,26 @@ public class Node implements Runnable {
     private ArrayList<Node> neighbour_nodes = new ArrayList<>();
     private ArrayList<Node> nodes_left_to_ack = new ArrayList<>();
 
-    // Variables for node coordinates and value
-    private int x_coord, y_coord, value;
-
-    public Node ( int id, int x_coord, int y_coord, int value ) {
+    public Node ( int id ) {
         this.id = id;
-        this.x_coord = x_coord;
-        this.y_coord = y_coord;
-        this.value = value;
     }
 
-    @Override
-    public void run() {
-        try {
-            if(this.id == 0){
-                Transmitter.send(this.id, "hi", MULTICAST_ADDR, MULTICAST_PORT);
-                TimeUnit.MILLISECONDS.sleep(500);
-                Transmitter.send(this.id, "Exit", MULTICAST_ADDR, MULTICAST_PORT);
-            }
-            else {
-                Receiver.receive(this.id, MULTICAST_ADDR, MULTICAST_PORT);
-            }
-            //TimeUnit.MILLISECONDS.sleep(10);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (Exception ex){
-            ex.printStackTrace();
-        }
+    public static void main ( String[] args ) throws IOException, InterruptedException {
+
+        // Atribuir dinamicamente id's aos nós com o mesmo pedaço de código
+
+
+        // Receive
+        //Thread t1 = new Thread( new Rafael.Receiver() );
+        //t1.start();
+
+        // Delay to ensure the first send is received
+        //TimeUnit.MILLISECONDS.sleep(10);
+
+        // Transmit
+        //Rafael.Transmitter.send( "Multicast Message Test", MULTICAST_ADDR, MULTICAST_PORT );
+        Transmitter.send( "Exit", MULTICAST_ADDR, MULTICAST_PORT );
+
     }
+
 }

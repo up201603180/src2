@@ -1,12 +1,18 @@
+package Rafael;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-public class Receiver {
+public class Receiver implements Runnable {
+
+    // Variables for the Multicast Communication
+    private static final int    MULTICAST_PORT = 1234;
+    private static final String MULTICAST_ADDR = "228.5.6.7";
 
     // Receive a DatagramPacket from a specific port of a multicast address
-    public static void receive( int node,String multicast_address, int multicast_port ) throws IOException {
+    public void receive( String multicast_address, int multicast_port ) throws IOException {
 
         // Join a Multicast group
         MulticastSocket multicast_socket = new MulticastSocket( multicast_port );
@@ -16,18 +22,16 @@ public class Receiver {
         // Receive a DatagramPacket containing a message
         byte[] buffer = new byte[ 1024 ];
         while ( true ) {
-
-            System.out.println( "[Client "+node+"]: Waiting..." );
+            System.out.println( "[Client]: Waiting..." );
 
             DatagramPacket packet = new DatagramPacket( buffer, buffer.length );
-            multicast_socket.receive(packet);
+            multicast_socket.receive( packet );
+            String message = new String( packet.getData(), packet.getOffset(), packet.getLength() );
+            System.out.println("[Server]: " + message );
 
-            String fullmessage = new String( packet.getData(), packet.getOffset(), packet.getLength() );
-            int nodeOrig = Integer.parseInt(fullmessage.split((";"))[0]);
-            String message = fullmessage.split((";"))[1];
-            System.out.println("Client: "+node+" received from Server "+nodeOrig+": " + message );
+            // Rejeitar as mensagens do próprio nó
 
-            // Explorar comandos para alterar disposição dos nós etc...
+            // Tratar diversas Rafael.MessageType
             if ( "Exit".equals( message ) ) break;
         }
 
@@ -35,6 +39,15 @@ public class Receiver {
         multicast_socket.leaveGroup( multicast_group );
         multicast_socket.close();
 
+    }
+
+    @Override
+    public void run() {
+        try {
+            receive( MULTICAST_ADDR, MULTICAST_PORT );
+        } catch ( IOException ex ) {
+            ex.printStackTrace();
+        }
     }
 
 }
