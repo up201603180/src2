@@ -1,3 +1,5 @@
+package Rafael;
+
 public enum MessageType {
     ELECTION,
     ACKNOWLEDGE,

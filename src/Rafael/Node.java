@@ -1,6 +1,7 @@
+package Rafael;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 public class Node {
 
@@ -26,15 +27,15 @@ public class Node {
 
 
         // Receive
-        Thread t1 = new Thread( new Receiver() );
-        t1.start();
+        //Thread t1 = new Thread( new Rafael.Receiver() );
+        //t1.start();
 
         // Delay to ensure the first send is received
-        TimeUnit.MILLISECONDS.sleep(10);
+        //TimeUnit.MILLISECONDS.sleep(10);
 
         // Transmit
-        Transmitter.send( "Multicast Message Test", MULTICAST_ADDR, MULTICAST_PORT );
-        //Transmitter.send( "Exit", MULTICAST_ADDR, MULTICAST_PORT );
+        //Rafael.Transmitter.send( "Multicast Message Test", MULTICAST_ADDR, MULTICAST_PORT );
+        Transmitter.send( "Exit", MULTICAST_ADDR, MULTICAST_PORT );
 
     }
 

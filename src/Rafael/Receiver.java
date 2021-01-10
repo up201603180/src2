@@ -1,3 +1,5 @@
+package Rafael;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -29,7 +31,7 @@ public class Receiver implements Runnable {
 
             // Rejeitar as mensagens do próprio nó
 
-            // Tratar diversas MessageType
+            // Tratar diversas Rafael.MessageType
             if ( "Exit".equals( message ) ) break;
         }
 
