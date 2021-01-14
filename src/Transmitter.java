@@ -6,14 +6,14 @@ import java.net.MulticastSocket;
 public class Transmitter {
 
     // Send a DatagramPacket to a specific port of a multicast address
-    public static void send ( int nodeId, String message, String multicast_addr, int multicast_port ) throws IOException {
+    public static void send ( int nodeID, String message, String multicast_addr, int multicast_port ) throws IOException {
 
         // Join a Multicast group
         InetAddress multicast_group = InetAddress.getByName( multicast_addr );
         MulticastSocket multicast_socket = new MulticastSocket();
 
         // Send a DatagramPacket containing a message
-        byte[] buffer = (nodeId+";"+message).getBytes();
+        byte[] buffer = ( nodeID + ";" + message ).getBytes();
         DatagramPacket packet = new DatagramPacket( buffer, buffer.length, multicast_group, multicast_port );
         multicast_socket.send( packet );
 
