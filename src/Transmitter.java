@@ -7,35 +7,61 @@ import java.net.MulticastSocket;
 
 public class Transmitter implements Runnable{
 
-    private static final int    MULTICAST_PORT = 1234;
-    private static final String MULTICAST_ADDRESS = "228.5.6.7";
+    /*
+     *   Variables
+     */
     public int nodeID;
-    public int value;
+    private String multicast_address;
+    private int multicast_port;
+    private MulticastSocket multicast_socket;
+    private InetAddress multicast_group;
 
-    public Transmitter(int nodeID, int value){
+    /*
+     *   Constructors
+     */
+    public Transmitter( int nodeID, String multicast_address, int multicast_port ){
+
         this.nodeID = nodeID;
-        this.value = value;
+        this.multicast_address = multicast_address;
+        this.multicast_port = multicast_port;
+
     }
 
-    // Send a DatagramPacket to a specific port of a multicast address
-    public static void send ( int nodeID, String message, String multicast_addr, int multicast_port ) throws IOException {
+    /*
+     *   Methods
+     */
 
-        // Join a Multicast group
-        InetAddress multicast_group = InetAddress.getByName( multicast_addr );
-        MulticastSocket multicast_socket = new MulticastSocket();
+    // Join a Multicast group
+    public void initiateSockets() throws IOException {
+
+        this.multicast_group = InetAddress.getByName( this.multicast_address );
+        this.multicast_socket = new MulticastSocket();
+
+    }
+
+    // Leave Multicast group and close the socket
+    public void closeMulticast() throws IOException {
+
+        this.multicast_socket.close();
+
+    }
+
+    // Send a DatagramPacket
+    public void send ( int nodeID, String message) throws IOException {
 
         // Send a DatagramPacket containing a message
         byte[] buffer = ( nodeID + ";" + message ).getBytes();
-        DatagramPacket packet = new DatagramPacket( buffer, buffer.length, multicast_group, multicast_port );
-        multicast_socket.send( packet );
-
-        // Close the socket
-        multicast_socket.close();
+        DatagramPacket packet = new DatagramPacket( buffer, buffer.length, this.multicast_group, this.multicast_port );
+        this.multicast_socket.send( packet );
 
     }
+
+    @Override
     public void run(){
         try {
-            send( this.nodeID, String.valueOf( this.value ), MULTICAST_ADDRESS, MULTICAST_PORT );
+            initiateSockets();
+            send( this.nodeID, "Hello");
+            closeMulticast();
         }
         catch (IOException ex){
             //ex.printStackTrace();

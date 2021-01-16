@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -12,7 +13,13 @@ public class Node {
 
     // Variables for the Multicast Communication
     private static final int    MULTICAST_PORT = 1234;
+    private static final String MULTICAST_ADDRESS_1 = "230.0.0.1";
+    private static final String MULTICAST_ADDRESS_2 = "230.0.0.2";
+    private static final String MULTICAST_ADDRESS_3 = "230.0.0.3";
+    private static final String MULTICAST_ADDRESS_4 = "230.0.0.4";
+    private static final String MULTICAST_ADDRESS_5 = "230.0.0.5";
     Receiver receiver;
+    Transmitter transmitter;
 
     // Variables kept during election
     private int src_i; // Computation index of the diffusing computation
@@ -21,7 +28,7 @@ public class Node {
     private int nodeID; // this node id
     private int nodeParent; // id of the parent node
     private int nodeLeader; // id of the leader node (-1 when a node starts its execution)
-    private ArrayList<NodeInfo> neighbourNodes = new ArrayList<>();
+    private ArrayList<NodeInfo> neighbourInfo = new ArrayList<>();
     private ArrayList<Node> nodes_left_to_ack = new ArrayList<>();
 
     // Variables for node coordinates and value
@@ -46,58 +53,80 @@ public class Node {
     /*
      * Methods
      */
+    public void initializeNode ( Node node ) {
 
-    public void initializeNode(Node node) throws Exception{
-        NodeInfo node1 = new NodeInfo(1, 3, 0, 2);
-        NodeInfo node2 = new NodeInfo(2, 2, 2, 1);
-        NodeInfo node3 = new NodeInfo(3, 5, 2, 3);
-        NodeInfo node4 = new NodeInfo(4, 10, 3, 3);
-        NodeInfo node5 = new NodeInfo(5, 7, 3, 1);
+        // NodeInfo Initialization
+        NodeInfo node1 = new NodeInfo(1, MULTICAST_ADDRESS_1, 0, 2);
+        NodeInfo node2 = new NodeInfo(2, MULTICAST_ADDRESS_2, 2, 1);
+        NodeInfo node3 = new NodeInfo(3, MULTICAST_ADDRESS_3, 2, 3);
+        NodeInfo node4 = new NodeInfo(4, MULTICAST_ADDRESS_4, 3, 3);
+        NodeInfo node5 = new NodeInfo(5, MULTICAST_ADDRESS_5, 3, 1);
 
-        //Tree initialization
-        switch(node.nodeID) {
+        // Tree initialization
+        switch( node.nodeID ) {
             case 1:
                 node.nodeParent = 1;
-                node.neighbourNodes.add(node2);
-                node.neighbourNodes.add(node3);
-                InetAddress group1 = InetAddress.getByName("230.0.0.1");
-                MulticastSocket receiveSocket = new MulticastSocket(MULTICAST_PORT); //Receiver socket
-                DatagramSocket transmitSocket = new DatagramSocket();
+                node.neighbourInfo.add( node2 );
+                node.neighbourInfo.add( node3 );
+                // Receiver/Transmitter Instantiation
+                this.receiver = new Receiver( node.nodeID, MULTICAST_ADDRESS_1, MULTICAST_PORT, neighbourInfo );
+                this.transmitter = new Transmitter( node.nodeID, MULTICAST_ADDRESS_1, MULTICAST_PORT);
+                break;
             case 2:
                 node.nodeParent = 1;
-                node.neighbourNodes.add(node1);
-                node.neighbourNodes.add(node3);
-                node.neighbourNodes.add(node5);
+                node.neighbourInfo.add( node1 );
+                node.neighbourInfo.add( node3 );
+                node.neighbourInfo.add( node5 );
+                // Receiver/Transmitter Instantiation
+                this.receiver = new Receiver( node.nodeID, MULTICAST_ADDRESS_2, MULTICAST_PORT, neighbourInfo );
+                this.transmitter = new Transmitter( node.nodeID, MULTICAST_ADDRESS_2, MULTICAST_PORT);
+                break;
             case 3:
                 node.nodeParent = 1;
-                node.neighbourNodes.add(node1);
-                node.neighbourNodes.add(node2);
-                node.neighbourNodes.add(node4);
+                node.neighbourInfo.add( node1 );
+                node.neighbourInfo.add( node2 );
+                node.neighbourInfo.add( node4 );
+                // Receiver/Transmitter Instantiation
+                this.receiver = new Receiver( node.nodeID, MULTICAST_ADDRESS_3, MULTICAST_PORT, neighbourInfo );
+                this.transmitter = new Transmitter( node.nodeID, MULTICAST_ADDRESS_3, MULTICAST_PORT);
                 break;
             case 4:
                 node.nodeParent = 3;
-                node.neighbourNodes.add(node3);
-                node.neighbourNodes.add(node5);
+                node.neighbourInfo.add( node3 );
+                node.neighbourInfo.add( node5 );
+                // Receiver/Transmitter Instantiation
+                this.receiver = new Receiver( node.nodeID, MULTICAST_ADDRESS_4, MULTICAST_PORT, neighbourInfo );
+                this.transmitter = new Transmitter( node.nodeID, MULTICAST_ADDRESS_4, MULTICAST_PORT);
                 break;
             case 5:
                 node.nodeParent = 2;
-                node.neighbourNodes.add(node2);
-                node.neighbourNodes.add(node4);
+                node.neighbourInfo.add( node2 );
+                node.neighbourInfo.add( node4 );
+                // Receiver/Transmitter Instantiation
+                this.receiver = new Receiver( node.nodeID, MULTICAST_ADDRESS_5, MULTICAST_PORT, neighbourInfo );
+                this.transmitter = new Transmitter( node.nodeID, MULTICAST_ADDRESS_5, MULTICAST_PORT);
                 break;
         }
+
+        // Thread Initialization
+        Thread threadReceiver = new Thread( this.receiver );
+        threadReceiver.start();
+
+        Thread threadTransmitter = new Thread( this.transmitter );
+        threadTransmitter.start();
+
     }
 
-
-    //Getters
+    // Getters
     public int getNodeID() {
         return nodeID;
     }
 
-    public int getX_coord() {
+    public int getXCoord() {
         return xCoord;
     }
 
-    public int getY_coord() {
+    public int getYCoord() {
         return yCoord;
     }
 
@@ -105,24 +134,16 @@ public class Node {
         return value;
     }
 
-    public static void main ( String[] args ) throws InterruptedException {
+    public static void main ( String[] args ) {
 
-        if ( args.length != 4 ) {
-            System.out.println( "Usage: java Node.java <nodeID> <x_coord> <y_coord> <node_value>" );
-        }
+        // Argument check
+        if ( args.length != 4 ) System.out.println( "Usage: java Node.java <nodeID> <x_coord> <y_coord> <node_value>" );
+
+        // Node Instantiation and Information Display
         Node node = new Node( Integer.parseInt(args[0]), Integer.parseInt(args[1]),Integer.parseInt(args[2]), Integer.parseInt(args[3]) );
-        System.out.println( "ID = " + node.getNodeID() + "\nx = " + node.getX_coord() + "\ny = " + node.getY_coord() + "\nvalue = " + node.getValue() );
+        System.out.println( "ID = " + node.getNodeID() + "\nx = " + node.getXCoord() + "\ny = " + node.getYCoord() + "\nvalue = " + node.getValue() );
 
-        //Declaração do objecto para o thread receptor
-        //Receiver receiver = new Receiver(Integer.parseInt(args[0]), MULTICAST_ADDRESS, MULTICAST_PORT);
-        //Declaração do objecto para o thread transmissor
-        Transmitter transmitter = new Transmitter(Integer.parseInt(args[0]), Integer.parseInt(args[3]));
-        //Declaração dos threads
-        //Thread threadReceiver = new Thread( receiver );
-        //threadReceiver.start();
-        Thread threadTransmitter = new Thread( transmitter);
-        threadTransmitter.start();
-        //Election algorithm
+        node.initializeNode( node );
 
     }
 
