@@ -1,9 +1,7 @@
-import java.io.IOException;
-import java.net.DatagramPacket;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class Node implements Runnable {
+public class Node {
 
     /*
      * Variables
@@ -11,11 +9,13 @@ public class Node implements Runnable {
 
     // Variables for the Multicast Communication
     private static final int    MULTICAST_PORT = 1234;
-    private static final String MULTICAST_ADDR = "228.5.6.7";
+    private static final String MULTICAST_ADDRESS = "228.5.6.7";
     Receiver receiver;
 
     // Variables kept during election
-    private Boolean in_election; // 1 if the node is election a leader
+    private int src_i; // Computation index of the diffusing computation
+    private int delta_i; // 0 if node has sent its pending ACK message to its parent
+    private Boolean in_election; // 1 if the node is electing a leader
     private int nodeID; // this node id
     private int node_parent; // id of the parent node
     private int node_leader; // id of the leader node (-1 when a node starts its execution)
@@ -25,6 +25,8 @@ public class Node implements Runnable {
 
     // Variables for node coordinates and value
     private int x_coord, y_coord, value;
+    private boolean hasLeader = false; //Variable to indicate if node has leader
+    private int lid_i; // Current leader
 
     /*
      * Constructors
@@ -37,45 +39,14 @@ public class Node implements Runnable {
         this.y_coord = y_coord;
         this.value = value;
 
-        this.receiver = new Receiver( nodeID, MULTICAST_ADDR, MULTICAST_PORT );
-
+        this.receiver = new Receiver( nodeID, MULTICAST_ADDRESS, MULTICAST_PORT );
     }
 
     /*
      * Methods
      */
 
-    @Override
-    public void run() {
-
-        try {
-
-            nodeInfoList.put( this.nodeID, this.value );
-            this.receiver.initiateSockets();
-            Transmitter.send( this.nodeID, String.valueOf( this.value ), MULTICAST_ADDR, MULTICAST_PORT );
-            NodeMessage nm;
-            boolean keep = true;
-
-            while ( keep ) {
-
-                nm = this.receiver.receive();
-
-                if ( nm != null ) {
-                    System.out.println( "Node " + nm.getNodeId() + ": " + nm.getMessage() );
-                    if ( nm.getMessage().equals("EXIT") )
-                        keep = false;
-                }
-
-
-            }
-
-            this.receiver.closeMulticast();
-
-        } catch ( Exception ex ) {
-            ex.printStackTrace();
-        }
-    }
-
+    //Getters
     public int getNodeID() {
         return nodeID;
     }
@@ -99,9 +70,15 @@ public class Node implements Runnable {
         }
         Node node = new Node( Integer.parseInt(args[0]), Integer.parseInt(args[1]),Integer.parseInt(args[2]), Integer.parseInt(args[3]) );
         System.out.println( "ID = " + node.getNodeID() + "\nx = " + node.getX_coord() + "\ny = " + node.getY_coord() + "\nvalue = " + node.getValue() );
-
-        Thread t = new Thread( node );
-        t.start();
+        //Declaração do objecto para o thread receptor
+        Receiver receiver = new Receiver(Integer.parseInt(args[0]), MULTICAST_ADDRESS, MULTICAST_PORT);
+        //Declaração do objecto para o thread transmissor
+        Transmitter transmitter = new Transmitter(Integer.parseInt(args[0]), Integer.parseInt(args[3]));
+        //Declaração dos threads
+        Thread threadReceiver = new Thread( receiver );
+        threadReceiver.start();
+        Thread threadTransmitter = new Thread( transmitter);
+        threadTransmitter.start();
         TimeUnit.MILLISECONDS.sleep( 10 );
 
     }

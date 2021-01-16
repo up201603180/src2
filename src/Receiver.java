@@ -3,7 +3,7 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-public class Receiver {
+public class Receiver implements Runnable{
 
     /*
      *   Variables
@@ -63,5 +63,27 @@ public class Receiver {
             return null;
 
     }
+    public void run() {
+        try {
+            initiateSockets();
+            NodeMessage nm;
+            boolean keep = true;
+            while (keep) {
 
+                nm = receive();
+
+                if (nm != null) {
+                    System.out.println("Node " + nm.getNodeId() + ": " + nm.getMessage());
+                    if (nm.getMessage().equals("EXIT")) {
+                        keep = false;
+                    }
+                }
+            }
+            closeMulticast();
+        }
+        catch (IOException ex){
+            //ex.printStackTrace();
+            System.out.println("Failed to initialize sockets.");
+        }
+    }
 }
