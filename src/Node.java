@@ -70,7 +70,7 @@ public class Node {
                 node.neighbourInfo.add( node3 );
                 // Receiver/Transmitter Instantiation
                 this.receiver = new Receiver( node.nodeID, MULTICAST_ADDRESS_1, MULTICAST_PORT, neighbourInfo );
-                this.transmitter = new Transmitter( node.nodeID, MULTICAST_ADDRESS_1, MULTICAST_PORT);
+                this.transmitter = new Transmitter( node.nodeID, MULTICAST_ADDRESS_1, MULTICAST_PORT );
                 break;
             case 2:
                 node.nodeParent = 1;
