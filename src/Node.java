@@ -48,11 +48,11 @@ public class Node {
      */
 
     public void initializeNode(Node node) throws Exception{
-        NodeInfo node1 = new NodeInfo(1, 3, 0, 2);
-        NodeInfo node2 = new NodeInfo(2, 2, 2, 1);
-        NodeInfo node3 = new NodeInfo(3, 5, 2, 3);
-        NodeInfo node4 = new NodeInfo(4, 10, 3, 3);
-        NodeInfo node5 = new NodeInfo(5, 7, 3, 1);
+        NodeInfo node1 = new NodeInfo(1, 0, 2);
+        NodeInfo node2 = new NodeInfo(2, 2, 1);
+        NodeInfo node3 = new NodeInfo(3, 2, 3);
+        NodeInfo node4 = new NodeInfo(4, 3, 3);
+        NodeInfo node5 = new NodeInfo(5, 3, 1);
 
         //Tree initialization
         switch(node.nodeID) {
